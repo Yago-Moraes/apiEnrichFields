@@ -10,22 +10,53 @@ app.use(express.json());
 app.get("/:entity/:id/", async (req, res) => {
     const { entity, id } = req.params;
     const enrichParams = req.query.enrichParams;
+    const urlComplete = `${url}/${entity}/${id}`;
 
     if (!enrichParams) {
-        console.log("Sem parametros");
+        try {
+            const response = await axios.get(urlComplete);
+            const responseData = response.data
+            res.send(responseData);
+            
+        } catch (error) {
+            res.send(error)
+        }
+        
     } else {
-        const urlComplete = `${url}/${entity}/${id}`;
+        
         try {
             const splitedParams = enrichParams.split(",");
-            console.log(splitedParams);
+            /* console.log(splitedParams); */
 
-            const response = await axios.get(urlComplete);
-            res.send(response.data);
-            const responseObjKeys = Object.keys(response.data)
-            console.log(responseObjKeys);
+            const responseEnrichParams = await axios.get(urlComplete);
+            const responseEnrichParamsData = responseEnrichParams.data
 
-            const intersection = splitedParams.filter(element=>responseObjKeys.includes(element))
-            console.log(intersection);
+            
+            const responseEnrichParamsObjKeys = Object.keys(responseEnrichParamsData)
+            /* console.log(responseEnrichParamsObjKeys); */
+
+            const intersection = splitedParams.filter(element=>responseEnrichParamsObjKeys.includes(element))
+            /* console.log(intersection); */
+
+            responseEnrichParamsData.enrichParams = intersection
+
+        
+            for (let i = 0; i<splitedParams.length; i++){
+                if(splitedParams[i] in responseEnrichParamsData){
+                    const detailEntry = responseEnrichParamsData[splitedParams[i]]
+                    console.log(detailEntry);
+                    for(let i = 0; i< detailEntry.length; i++){
+                        const specificEntry = detailEntry[i]
+                        const accessSpecificEntry = await axios.get(specificEntry)
+                        const accessSpecificEntryData = accessSpecificEntry.data
+                        detailEntry[i] = accessSpecificEntryData
+                    }
+                    console.log(detailEntry) 
+                } 
+            }
+
+
+            res.send(responseEnrichParamsData);
         } catch (error) {
             res.send(error);
         }
@@ -35,5 +66,3 @@ app.get("/:entity/:id/", async (req, res) => {
 app.listen(port, () => {
     console.log(`Servidor aberto no http://localhost:${port}`);
 });
-
-// site/parametro/id/?enrichParams=...
