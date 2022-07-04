@@ -1,5 +1,7 @@
 import axios from "axios";
 import swapiSimple from "../model/swapiSimpleModel.js";
+import enrichFunction from "../util/enrichFunction.js";
+//import swapiEnrich from "../model/swapiEnrichModel.js";
 
 const url = "https://swapi.dev/api";
 
@@ -24,8 +26,12 @@ const swapiController = (app) =>{
             }
             
         } else {
-            
+            //const enrich = new swapiEnrich()
             try {
+                //Maneira mais enchuta pra utilizar:
+                /* const responseEnrich = await enrich.getResponse(urlComplete)
+                res.json(responseEnrich) */
+
                 const splitedParams = enrichParams.split(",");
                 //console.log(splitedParams);
     
@@ -42,19 +48,7 @@ const swapiController = (app) =>{
                 responseEnrichParamsData.enrichParams = intersection
     
                 const newResponseData = responseEnrichParamsData
-                for (let i = 0; i<splitedParams.length; i++){
-                    if(splitedParams[i] in newResponseData){
-                        const detailEntry = newResponseData[splitedParams[i]]
-                        //console.log(detailEntry);
-                        for(let j = 0; j< detailEntry.length; j++){
-                            const specificEntry = detailEntry[j]
-                            const accessSpecificEntry = await axios.get(specificEntry)
-                            const accessSpecificEntryData = accessSpecificEntry.data
-                            detailEntry[j] = accessSpecificEntryData
-                        }
-                        //console.log(detailEntry) 
-                    } 
-                }
+                await enrichFunction(splitedParams, newResponseData);
     
     
                 //res.json(responseEnrichParamsData);
@@ -67,3 +61,19 @@ const swapiController = (app) =>{
 }
 
 export default swapiController
+
+/* async function enrichFunction(splitedParams, newResponseData) {
+    for (let i = 0; i < splitedParams.length; i++) {
+        if (splitedParams[i] in newResponseData) {
+            const detailEntry = newResponseData[splitedParams[i]];
+            //console.log(detailEntry);
+            for (let j = 0; j < detailEntry.length; j++) {
+                const specificEntry = detailEntry[j];
+                const accessSpecificEntry = await axios.get(specificEntry);
+                const accessSpecificEntryData = accessSpecificEntry.data;
+                detailEntry[j] = accessSpecificEntryData;
+            }
+            //console.log(detailEntry) 
+        }
+    }
+} */
