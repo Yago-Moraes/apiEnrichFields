@@ -40,23 +40,24 @@ app.get("/:entity/:id/", async (req, res) => {
 
             responseEnrichParamsData.enrichParams = intersection
 
-        
+            const newResponseData = responseEnrichParamsData
             for (let i = 0; i<splitedParams.length; i++){
-                if(splitedParams[i] in responseEnrichParamsData){
-                    const detailEntry = responseEnrichParamsData[splitedParams[i]]
-                    console.log(detailEntry);
-                    for(let i = 0; i< detailEntry.length; i++){
-                        const specificEntry = detailEntry[i]
+                if(splitedParams[i] in newResponseData){
+                    const detailEntry = newResponseData[splitedParams[i]]
+                    //console.log(detailEntry);
+                    for(let j = 0; j< detailEntry.length; j++){
+                        const specificEntry = detailEntry[j]
                         const accessSpecificEntry = await axios.get(specificEntry)
                         const accessSpecificEntryData = accessSpecificEntry.data
-                        detailEntry[i] = accessSpecificEntryData
+                        detailEntry[j] = accessSpecificEntryData
                     }
-                    console.log(detailEntry) 
+                    //console.log(detailEntry) 
                 } 
             }
 
 
-            res.send(responseEnrichParamsData);
+            //res.send(responseEnrichParamsData);
+            res.send(newResponseData)
         } catch (error) {
             res.send(error);
         }
