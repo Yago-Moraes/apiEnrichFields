@@ -1,5 +1,5 @@
 import express from "express";
-import swapiController from "./controller/swapiController.js";
+import swapiController from "./src/controller/swapiController.js";
 
 const app = express();
 
